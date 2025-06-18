@@ -53,3 +53,10 @@
     display: flex;
     gap: 10px;
 }
+
+.total-price {
+    border: 2px solid black;
+    font-size: 30px;
+    border-radius: 20px;
+    padding: 10px;
+}
