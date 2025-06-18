@@ -1,0 +1,22 @@
+.global_button {
+    color: black;
+    background-color: greenyellow;
+    border-radius: 15px;
+    padding: 10px 20px;
+    font-weight: bold;
+    border: none;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.global_button:hover {
+    cursor: pointer;
+}
+
+@media screen and (max-width: 750px) {
+    .global_button {
+        border-radius: 10px;
+        padding: 5px 10px;
+        font-size: 14px;
+    }
+}

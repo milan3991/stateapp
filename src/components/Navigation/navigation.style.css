@@ -1,0 +1,151 @@
+.navigation {
+  color: black;
+  width: 100%;
+  min-height: 60px;
+  font-size: 20px;
+
+}
+
+.navigation_wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1350px;
+  margin: 0px auto;
+}
+
+.navigation_left {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  text-transform: uppercase;
+}
+
+.navigation_wrapper span a {
+  text-decoration: none;
+  border-radius: 15px;
+  padding: 5px 20px;
+  font-weight: bold;
+  color: black;
+}
+
+.navigation_list {
+  display: flex;
+  gap: 20px;
+}
+
+.navigation_list a {
+  color: black;
+  text-decoration: none;
+}
+
+.navigation_list a:hover {
+  color: red;
+}
+
+.logo {
+  max-width: 65px;
+  margin-top: 10px;
+}
+
+.burger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease-in-out;
+}
+
+.burger img {
+  width: 40px;
+  height: auto;
+  transition: transform 0.1s ease-in-out;
+}
+
+.burger.rotate img {
+  transform: rotate(-90deg);
+}
+
+
+@media screen and (max-width: 1250px) {
+  .navigation_wrapper {
+    width: 95%;
+    height: 50px;
+  }
+
+  .navigation_wrapper span a {
+    padding: 5px 10px;
+  }
+
+}
+
+@media screen and (max-width: 900px) {
+
+  .navigation_list {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    right: 1rem;
+    background-color: rgb(252, 249, 249);
+    padding: 1rem;
+    border-radius: 8px;
+    z-index: 100;
+    width: 40%;
+    align-items: center;
+    height: 100%;
+  }
+
+  .navigation_list a {
+    padding: 7px;
+    font-size: 20px;
+  }
+
+  .navigation_list.open {
+    display: flex;
+  }
+
+  .burger {
+    display: flex;
+  }
+
+  .logo {
+    display: none;
+  }
+
+}
+
+
+@media screen and (max-width: 600px) {
+  .navigation_wrapper {
+    min-height: 5vh;
+  }
+
+  .navigation_wrapper span a {
+    padding: 3px 7px;
+    font-size: 14px;
+  }
+
+  .navigation_list {
+    gap: 10px;
+  }
+
+  .logo {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 400px) {
+
+  .navigation_wrapper span a {
+    font-size: 10px;
+  }
+
+  .navigation_list a {
+    font-size: 14px;
+  }
+
+
+}
