@@ -51,7 +51,6 @@ const Footer = () => {
           <ul className="footerlist">
             <li><a onClick={() => navigate('/')}>Home</a></li>
             <li><a onClick={() => navigate('/state')}>Counter</a></li>
-            <li><a onClick={() => navigate('/learning')}>Learning</a></li>
           </ul>
         </div>
 
