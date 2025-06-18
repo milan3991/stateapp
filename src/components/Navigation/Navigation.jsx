@@ -3,13 +3,17 @@ import { Link } from "react-router-dom";
 import './navigation.style.css';
 import logo from '../../assets/logo.svg';
 import burgerIcon from '../../assets/burger.svg';
+import cartIcon from '../../assets/cart.svg'
 
-const Navigation = () => {
+
+const Navigation = ({ cartItems = [] }) => {
     const [menuOpen, setMenuOpen] = useState(false);
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
     };
+
+    const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
     return (
         <div className="navigation">
@@ -27,7 +31,10 @@ const Navigation = () => {
                     <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
                     <Link to="/state" onClick={() => setMenuOpen(false)}>State</Link>
                     <Link to="/users" onClick={() => setMenuOpen(false)}>Users</Link>
-                    <Link to="/cart" onClick={() => setMenuOpen(false)}>Cart</Link>
+                    <Link to="/cart" onClick={() => setMenuOpen(false)} className="cart-link">
+                        <img src={cartIcon} alt="Cart" className="cart-icon" />
+                        {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
+                    </Link>
                 </nav>
             </div>
         </div>

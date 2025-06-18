@@ -9,7 +9,7 @@ import Cart from "./pages/Cart/Cart"
 
 function App() {
 
-    const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
 
   const handleAddCart = (item) => {
     const existingItem = cartItems.find((i) => i.id === item.id);
@@ -63,10 +63,7 @@ function App() {
 
   return (
     <Router>
-      <Navigation
-        cartCounter={cartItems.length}
-      />
-
+      <Navigation cartItems={cartItems} />
       <Routes>
         <Route path="/" element={<State
           handleAddCart={handleAddCart}

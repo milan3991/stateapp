@@ -2,7 +2,7 @@
   max-width: 600px;
   margin: 40px auto;
   padding: 20px;
-  background-color: #2e2e3e;
+  background-color: white;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
@@ -47,9 +47,10 @@ h1 {
 }
 
 .user-card {
-  background-color: #444;
+  background-color: white;
   padding: 15px;
   border-radius: 8px;
+  border: 2px solid grey;
 }
 
 .no-users {
