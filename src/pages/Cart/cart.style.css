@@ -60,3 +60,49 @@
     border-radius: 20px;
     padding: 10px;
 }
+
+.inputfield {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.discount-input {
+    padding: 10px;
+    font-size: 1em;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.apply-discount {
+    padding: 10px 15px;
+    font-size: 1em;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.apply-discount:hover {
+    background-color: #218838;
+}
+
+.price-details {
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+
+.discount-amount {
+    color: #e74c3c;
+}
+
+.final-price {
+    font-size: 1.5em;
+    font-weight: bold;
+}
