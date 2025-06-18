@@ -2,7 +2,6 @@ import { Route, Routes, BrowserRouter as Router } from "react-router-dom"
 import './App.css'
 import Navigation from "./components/Navigation/Navigation"
 import Footer from "./components/Footer/Footer"
-import Home from "./pages/Home/Home"
 import State from "./pages/Counter/State"
 import Users from "./pages/Users/Users"
 import { useState } from "react"
