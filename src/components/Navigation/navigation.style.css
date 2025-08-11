@@ -22,7 +22,7 @@
   text-transform: uppercase;
 }
 
-.navigation_wrapper span a {
+.navigation_wrapper a {
   text-decoration: none;
   border-radius: 15px;
   padding: 5px 20px;
