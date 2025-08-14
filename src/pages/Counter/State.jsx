@@ -7,7 +7,7 @@ import espresso from '../../assets/espresso.svg';
 import './style.counter.css';
 import StateItem from './components/StateItems';
 
-const State = ({ handleAddCart, handleRemoveCart }) => {
+const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders }) => {
     const items = [
         {
             id: 1,
@@ -63,13 +63,20 @@ const State = ({ handleAddCart, handleRemoveCart }) => {
     };
 
     const handlePreuzetoClick = (itemId) => {
-        setCompletedOrders(prev => [...prev, itemId]); 
+        setCompletedOrders(prev => [...prev, itemId]);
         setShowExtraButtons(prev => {
             const copy = { ...prev };
-            delete copy[itemId]; 
+            delete copy[itemId];
             return copy;
         });
-        handleRemoveCart(itemId); 
+        handleRemoveCart(itemId);
+        setReadyOrders(prev => prev.filter(id => id !== itemId));
+    };
+
+    const handleSpremnoClick = (itemId) => {
+        if (!readyOrders.includes(itemId)) {
+            setReadyOrders(prev => [...prev, itemId]);
+        }
     };
 
     return (
@@ -105,7 +112,7 @@ const State = ({ handleAddCart, handleRemoveCart }) => {
                                     {showExtraButtons[item.id] && (
                                         <>
                                             <button
-                                                onClick={() => console.log(`Spremno za ID: ${item.id}`)}
+                                                onClick={() => handleSpremnoClick(item.id)}
                                                 className="action-button ready"
                                             >
                                                 Spremno
@@ -120,8 +127,7 @@ const State = ({ handleAddCart, handleRemoveCart }) => {
                                     )}
                                 </div>
                             </div>
-                        ))
-                    }
+                        ))}
                 </div>
             </div>
         </div>

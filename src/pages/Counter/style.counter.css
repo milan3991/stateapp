@@ -134,33 +134,3 @@
   gap: 0.8rem;
 }
 
-
-@keyframes rotateGradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 360% 50%;
-  }
-}
-
-.ready-frame {
-  position: relative;
-  padding: 1rem;
-  border-radius: 12px;
-  z-index: 0;
-}
-
-.ready-frame::before {
-  content: "";
-  position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  border-radius: 16px;
-  background: linear-gradient(270deg, #0f9d58, #34a853, #0f9d58, #34a853);
-  background-size: 800% 800%;
-  animation: rotateGradient 4s linear infinite;
-  z-index: -1;
-}
