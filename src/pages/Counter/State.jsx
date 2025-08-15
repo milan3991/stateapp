@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
 
 import americano from '../../assets/americano.svg';
 import cappuccino from '../../assets/cappuccino.svg';
@@ -18,7 +18,6 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
                 { image: americano, heading: 'Espresso Classic', quantity: 4 },
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-
             ]
         },
         {
@@ -27,7 +26,6 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                 { image: espresso, heading: 'Macchiato Caramel', quantity: 2 },
                 { image: americano, heading: 'Espresso Classic', quantity: 4 },
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-
             ]
         },
         {
@@ -38,7 +36,6 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
                 { image: americano, heading: 'Espresso Classic', quantity: 4 },
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-
             ]
         },
         {
@@ -47,13 +44,12 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                 { image: espresso, heading: 'Macchiato Caramel', quantity: 5 },
             ]
         },
-                {
+        {
             id: 5, variants: [
                 { image: americano, heading: 'Espresso Classic', quantity: 4 },
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
                 { image: americano, heading: 'Espresso Classic', quantity: 4 },
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-
             ]
         },
         {
@@ -62,7 +58,6 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                 { image: espresso, heading: 'Macchiato Caramel', quantity: 2 },
                 { image: americano, heading: 'Espresso Classic', quantity: 4 },
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-
             ]
         },
         {
@@ -73,7 +68,6 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
                 { image: americano, heading: 'Espresso Classic', quantity: 4 },
                 { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-
             ]
         },
         {
@@ -82,32 +76,75 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                 { image: espresso, heading: 'Macchiato Caramel', quantity: 5 },
             ]
         },
-
     ];
 
-    const [showExtraButtons, setShowExtraButtons] = useState({});
+    const [statusById, setStatusById] = useState({});
 
-    const handlePripremaClick = (item) => {
-        handleAddCart(item);
-        setShowExtraButtons(prev => ({ ...prev, [item.id]: true }));
-    };
-
-    const handlePreuzetoClick = async (itemId) => {
-        // Zapiši u completedOrders
-        await setDoc(doc(db, "completedOrders", String(itemId)), { completed: true });
-
-        // Ukloni iz prikaza odmah
-        setShowExtraButtons(prev => {
-            const copy = { ...prev };
-            delete copy[itemId];
-            return copy;
+    // 🔹 Real-time sync za svaki artikl
+    useEffect(() => {
+        const unsubscribers = items.map(item => {
+            const ref = doc(db, "orders", String(item.id));
+            return onSnapshot(ref, (snapshot) => {
+                const data = snapshot.data();
+                setStatusById(prev => ({
+                    ...prev,
+                    [item.id]: {
+                        inPreparation: !!data?.inPreparation,
+                        ready: !!data?.ready,
+                        completed: !!data?.completed
+                    }
+                }));
+            });
         });
 
-        handleRemoveCart(itemId);
+        return () => unsubscribers.forEach(unsub => unsub());
+    }, []);
+
+    const isInPreparation = (id) => !!statusById[id]?.inPreparation;
+    const isCompletedDB = (id) => !!statusById[id]?.completed;
+
+    const handlePripremaClick = async (item) => {
+        handleAddCart(item);
+
+        // Odmah lokalno prikaži dugmad
+        setStatusById(prev => ({
+            ...prev,
+            [item.id]: { ...prev[item.id], inPreparation: true }
+        }));
+
+        // Spremi u Firestore
+        await setDoc(doc(db, "orders", String(item.id)), {
+            inPreparation: true,
+            ready: false,
+            completed: false
+        }, { merge: true });
     };
 
-    const handleSpremnoClick = async (itemId) => {
-        await setDoc(doc(db, "readyOrders", String(itemId)), { ready: true });
+const handleSpremnoClick = async (itemId) => {
+  setStatusById(prev => ({
+    ...prev,
+    [itemId]: { ...prev[itemId], ready: true }
+  }));
+
+  // Firestore orders update
+  await setDoc(doc(db, "orders", String(itemId)), {
+    ready: true
+  }, { merge: true });
+
+  // Dodaj u readyOrders kolekciju
+  await setDoc(doc(db, "readyOrders", String(itemId)), {
+    addedAt: serverTimestamp()
+  });
+};
+
+    const handlePreuzetoClick = async (itemId) => {
+        await setDoc(doc(db, "orders", String(itemId)), {
+            completed: true,
+            inPreparation: false,
+            ready: false
+        }, { merge: true });
+
+        handleRemoveCart(itemId);
     };
 
     return (
@@ -116,7 +153,7 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                 <div className="state-list-items">
 
                     {items
-                        .filter(item => !completedOrders.includes(item.id)) // ✅ filtriraj trajno
+                        .filter(item => !completedOrders.includes(item.id) && !isCompletedDB(item.id))
                         .map((item) => (
                             <div key={item.id} className="state-item-wrapper">
                                 <div className="variants-wrapper">
@@ -133,14 +170,16 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                                 </div>
 
                                 <div className="action-button-wrapper">
-                                    <button
-                                        onClick={() => handlePripremaClick(item)}
-                                        className="action-button"
-                                    >
-                                        Priprema
-                                    </button>
+                                    {!isInPreparation(item.id) && (
+                                        <button
+                                            onClick={() => handlePripremaClick(item)}
+                                            className="action-button"
+                                        >
+                                            Priprema
+                                        </button>
+                                    )}
 
-                                    {showExtraButtons[item.id] && (
+                                    {isInPreparation(item.id) && (
                                         <>
                                             <button
                                                 onClick={() => handleSpremnoClick(item.id)}
@@ -159,6 +198,7 @@ const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, c
                                 </div>
                             </div>
                         ))}
+
                 </div>
             </div>
         </div>

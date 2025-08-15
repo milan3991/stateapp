@@ -2,7 +2,7 @@
    display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 1500px;
+  max-width: 1700px;
   align-items: center;
   min-height: 100vh;
   align-items: center;
@@ -12,7 +12,7 @@
 .cart {
     display: flex;
     width: 100%;
-    max-width: 1500px;
+    max-width: 1700px;
     gap: 100px;
     flex-wrap: wrap;
 }

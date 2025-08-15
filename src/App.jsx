@@ -83,7 +83,7 @@ function App() {
               isInCart={isInCart}
               readyOrders={readyOrders}
               setReadyOrders={setReadyOrders}
-              completedOrders={completedOrders} // NOVO
+              completedOrders={completedOrders} 
             />
           }
         />
@@ -97,7 +97,7 @@ function App() {
               isInCart={isInCart}
               readyOrders={readyOrders}
               setReadyOrders={setReadyOrders}
-              completedOrders={completedOrders} // NOVO
+              completedOrders={completedOrders} 
             />
           }
         />
