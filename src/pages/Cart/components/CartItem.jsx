@@ -8,9 +8,8 @@ const CartItem = ({ image,  heading, quantity}) => {
             <img src={image} className='items_image' alt={heading} />
             <div className='item_details'>
                 <div className='nameprice'>
-                    <h4>{heading}</h4>
-                    <h4>X</h4>
-                    <h4>{quantity}</h4>
+                    <span className="item_name">{heading}</span>
+                    <span className="item_qty">X {quantity}</span>
                 </div>
             </div>
         </div>

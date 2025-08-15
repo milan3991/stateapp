@@ -1,46 +1,75 @@
 import { Route, Routes, BrowserRouter as Router } from "react-router-dom";
 import './App.css';
-import Navigation from "./components/Navigation/Navigation";
 import State from "./pages/Counter/State";
 import { useState, useEffect } from "react";
 import Cart from "./pages/Cart/Cart";
 
+import { db } from "./firebase";
+import {
+  collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp
+} from "firebase/firestore";
+
+import { getAuth, signInAnonymously } from "firebase/auth";
+const auth = getAuth();
+signInAnonymously(auth).catch(console.error);
+
 function App() {
-  const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem("cartItems");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [cartItems, setCartItems] = useState([]);
+  const [readyOrders, setReadyOrders] = useState([]);
+  const [completedOrders, setCompletedOrders] = useState([]); 
 
-  const [readyOrders, setReadyOrders] = useState(() => {
-    const saved = localStorage.getItem("readyOrders");
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  // Listen za cartItems
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
+    const unsub = onSnapshot(collection(db, "cartItems"), (snap) => {
+      const data = snap.docs.map(d => ({
+        orderId: d.id,
+        ...d.data()
+      }));
+      setCartItems(data);
+    });
+    return unsub;
+  }, []);
 
+  // Listen za readyOrders
   useEffect(() => {
-    localStorage.setItem("readyOrders", JSON.stringify(readyOrders));
-  }, [readyOrders]);
+    const unsub = onSnapshot(collection(db, "readyOrders"), (snap) => {
+      const ids = snap.docs.map(d => d.id);
+      setReadyOrders(ids);
+    });
+    return unsub;
+  }, []);
 
-  const handleAddCart = (item) => {
-    const existingItem = cartItems.find((i) => i.id === item.id);
-    if (!existingItem) {
-      setCartItems([...cartItems, { ...item, quantity: 1 }]);
-    }
+  // Listen za completedOrders 
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "completedOrders"), (snap) => {
+      const ids = snap.docs.map(d => Number(d.id)); // pretvori u broj
+      setCompletedOrders(ids);
+    });
+    return unsub;
+  }, []);
+
+  const handleAddCart = async (item) => {
+    const orderId = String(item.id);
+    await setDoc(
+      doc(db, "cartItems", orderId),
+      {
+        variants: item.variants,
+        createdAt: serverTimestamp()
+      },
+      { merge: false }
+    );
   };
 
-  const handleRemoveCart = (itemId) => {
-    setCartItems(cartItems.filter((cartItem) => cartItem.id !== itemId));
-    setReadyOrders(prev => prev.filter(id => id !== itemId)); // Ukloni iz spremnih ako se ukloni iz korpe
+  const handleRemoveCart = async (itemId) => {
+    const id = String(itemId);
+    await deleteDoc(doc(db, "cartItems", id)).catch(() => {});
+    await deleteDoc(doc(db, "readyOrders", id)).catch(() => {});
   };
 
-  const isInCart = (id) => cartItems.some(item => item.id === id);
+  const isInCart = (id) => cartItems.some(ci => String(ci.orderId) === String(id));
 
   return (
     <Router>
-      <Navigation cartItems={cartItems} />
       <Routes>
         <Route
           path="/"
@@ -52,6 +81,7 @@ function App() {
               isInCart={isInCart}
               readyOrders={readyOrders}
               setReadyOrders={setReadyOrders}
+              completedOrders={completedOrders} // NOVO
             />
           }
         />
@@ -65,6 +95,7 @@ function App() {
               isInCart={isInCart}
               readyOrders={readyOrders}
               setReadyOrders={setReadyOrders}
+              completedOrders={completedOrders} // NOVO
             />
           }
         />

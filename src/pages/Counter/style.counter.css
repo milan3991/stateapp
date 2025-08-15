@@ -6,19 +6,46 @@
     justify-content: center;
     margin: 0px auto;
     min-height: 50vh;
+    flex-wrap: wrap;
 }
 
 .state-content {
     display: flex;
-    gap: 200px;
+    width: 100%;
+    justify-content: center;
 
 }
 
+.state-list-items {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: center;
+  gap: 30px;
+  max-width: 1500px;
+  flex-wrap: wrap;
 
+}
 
-.ceneterline {
-    padding: 2px;
-    background-color: grey;
+.state-item-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 350px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 100px;
+  border-radius: 10px;
+  border: 2px solid #0f3d23;
+  padding: 20px;
+}
+
+.variants-wrapper {
+display: flex;
+flex-direction: column;
+gap: 10px;
+height: 100%;
+min-height: 400px;
 }
 
 .items_part {
@@ -54,6 +81,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 20px;
+    width: 100%;
 }
 
 .nameprice h4 {

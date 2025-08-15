@@ -12,27 +12,27 @@ const Cart = ({ cartItems, readyOrders = [] }) => {
     setCurrentVideo((prev) => (prev === 1 ? 2 : 1));
   };
 
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.src = currentVideo === 1 ? videoSrc : videoSrc2;
-      videoRef.current.play().catch(() => {
-      });
-    }
-  }, [currentVideo]);
+
+useEffect(() => {
+  if (!cartItems.length && videoRef.current) {
+    videoRef.current.src = currentVideo === 1 ? videoSrc : videoSrc2;
+    videoRef.current
+      .play()
+      .catch((err) => console.log("Video play error:", err));
+  }
+}, [cartItems, currentVideo]);
 
   return (
     <div className="state-cart-items">
-      <h3 className="items-header">Priprema</h3>
-
       <div className="cart">
         {cartItems.map((cartItem) => (
           <div
             key={cartItem.id}
             className={`cart-product-wrapper ${
-              readyOrders.includes(cartItem.id) ? 'ready-frame' : ''
+              readyOrders.includes(String(cartItem.orderId)) ? 'ready-frame' : ''
             }`}
           >
-            <h4>Broj narudzbe: {cartItem.id}</h4>
+            <h4 className='order-number'>Broj narudzbe: {cartItem.orderId}</h4>
             <div className="cart-variants">
               {cartItem.variants.map((variant, index) => (
                 <CartItem
@@ -51,7 +51,7 @@ const Cart = ({ cartItems, readyOrders = [] }) => {
         <div className="cart-empty">
           <video
             ref={videoRef}
-            width="600"
+            width="900"
             controls
             muted
             autoPlay
