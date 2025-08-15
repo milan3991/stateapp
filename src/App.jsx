@@ -3,6 +3,8 @@ import './App.css';
 import State from "./pages/Counter/State";
 import { useState, useEffect } from "react";
 import Cart from "./pages/Cart/Cart";
+import Navigation from "./components/Navigation/Navigation"
+
 
 import { db } from "./firebase";
 import {
