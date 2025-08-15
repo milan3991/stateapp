@@ -70,6 +70,8 @@ function App() {
 
   return (
     <Router>
+            <Navigation cartItems={cartItems} />
+
       <Routes>
         <Route
           path="/"
