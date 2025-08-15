@@ -13,14 +13,14 @@ const Cart = ({ cartItems, readyOrders = [] }) => {
   };
 
 
-useEffect(() => {
-  if (!cartItems.length && videoRef.current) {
-    videoRef.current.src = currentVideo === 1 ? videoSrc : videoSrc2;
-    videoRef.current
-      .play()
-      .catch((err) => console.log("Video play error:", err));
-  }
-}, [cartItems, currentVideo]);
+  useEffect(() => {
+    if (!cartItems.length && videoRef.current) {
+      videoRef.current.src = currentVideo === 1 ? videoSrc : videoSrc2;
+      videoRef.current
+        .play()
+        .catch((err) => console.log("Video play error:", err));
+    }
+  }, [cartItems, currentVideo]);
 
   return (
     <div className="state-cart-items">
@@ -28,9 +28,8 @@ useEffect(() => {
         {cartItems.map((cartItem) => (
           <div
             key={cartItem.id}
-            className={`cart-product-wrapper ${
-              readyOrders.includes(String(cartItem.orderId)) ? 'ready-frame' : ''
-            }`}
+            className={`cart-product-wrapper ${readyOrders.includes(String(cartItem.orderId)) ? 'ready-frame' : ''
+              }`}
           >
             <h4 className='order-number'>Broj narudzbe: {cartItem.orderId}</h4>
             <div className="cart-variants">
@@ -51,12 +50,11 @@ useEffect(() => {
         <div className="cart-empty">
           <video
             ref={videoRef}
-            width="900"
+            className="cart-video"
             controls
             muted
             autoPlay
             onEnded={handleVideoEnd}
-            style={{ borderRadius: '8px', boxShadow: '0 0 10px rgba(0,0,0,0.3)' }}
           >
             Your browser does not support the video tag.
           </video>
