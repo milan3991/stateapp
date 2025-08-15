@@ -4,6 +4,8 @@ import State from "./pages/Counter/State";
 import { useState, useEffect } from "react";
 import Cart from "./pages/Cart/Cart";
 
+
+
 import { db } from "./firebase";
 import {
   collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp
@@ -70,7 +72,7 @@ function App() {
 
   return (
     <Router>
-      <Routes>
+         <Routes>
         <Route
           path="/"
           element={
