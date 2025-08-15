@@ -33,7 +33,7 @@
     justify-content: flex-start;
     align-items: center;
       border-radius: 10px;
-  border: 2px solid #0f3d23;
+  border: 2px solid #0f9d58;
   padding: 20px;
 }
 
@@ -96,8 +96,8 @@ border-radius: 8px;
   padding: 1rem;
   border-radius: 12px;
   z-index: 0;
-  /* Opcionalno pozadina ili border u normalnom stanju */
   background-clip: padding-box;
+  color: white;
 }
 
 .ready-frame::before {
@@ -113,3 +113,4 @@ border-radius: 8px;
   animation: rotateGradient 4s linear infinite;
   z-index: -1;
 }
+

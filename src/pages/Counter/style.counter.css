@@ -19,7 +19,6 @@
 .state-list-items {
   display: flex;
   width: 100%;
-  max-width: 1200px;
   justify-content: center;
   gap: 30px;
   max-width: 1500px;
@@ -162,3 +161,48 @@ min-height: 400px;
   gap: 0.8rem;
 }
 
+
+@media screen and (max-width: 900px) {
+.state-wrapper {
+    max-width: 900px;
+}
+
+
+.state-list-items {
+  max-width: 900px;
+  gap: 10px;
+}
+
+.state-item-wrapper {
+  max-width: 200px;
+  gap: 20px;
+  padding: 20px;
+}
+
+.variants-wrapper {
+gap: 5px;
+}
+
+.items_part {
+    max-width: 200px;
+}
+
+.items_image {
+    max-width: 40px;
+}
+
+.nameprice {
+    gap: 5px;
+    width: 100%;
+}
+
+.action-button {
+
+  padding: 0.6rem 1rem;
+
+}
+
+.nameprice h4 {
+    font-size: 20px;
+}
+}
