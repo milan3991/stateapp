@@ -1,124 +1,74 @@
 import { useState, useEffect } from 'react';
-import { db } from '../../firebase';
-import { doc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
-
-import americano from '../../assets/americano.svg';
-import cappuccino from '../../assets/cappuccino.svg';
-import coffee from '../../assets/coffee.svg';
-import espresso from '../../assets/espresso.svg';
-
-import './style.counter.css';
 import StateItem from './components/StateItems';
 
-const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, completedOrders }) => {
-    const items = [
-        {
-            id: 1, variants: [
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-            ]
-        },
-        {
-            id: 2, variants: [
-                { image: coffee, heading: 'Macchiato Vanilla', quantity: 2 },
-                { image: espresso, heading: 'Macchiato Caramel', quantity: 2 },
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-            ]
-        },
-        {
-            id: 3, variants: [
-                { image: americano, heading: 'Espresso Classic', quantity: 3 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 3 },
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-            ]
-        },
-        {
-            id: 4, variants: [
-                { image: coffee, heading: 'Macchiato Vanilla', quantity: 5 },
-                { image: espresso, heading: 'Macchiato Caramel', quantity: 5 },
-            ]
-        },
-        {
-            id: 5, variants: [
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-            ]
-        },
-        {
-            id: 6, variants: [
-                { image: coffee, heading: 'Macchiato Vanilla', quantity: 2 },
-                { image: espresso, heading: 'Macchiato Caramel', quantity: 2 },
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-            ]
-        },
-        {
-            id: 7, variants: [
-                { image: americano, heading: 'Espresso Classic', quantity: 3 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 3 },
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-                { image: americano, heading: 'Espresso Classic', quantity: 4 },
-                { image: cappuccino, heading: 'Espresso Strong', quantity: 4 },
-            ]
-        },
-        {
-            id: 8, variants: [
-                { image: coffee, heading: 'Macchiato Vanilla', quantity: 5 },
-                { image: espresso, heading: 'Macchiato Caramel', quantity: 5 },
-            ]
-        },
-    ];
+import './style.counter.css';
 
+import { db } from '../../firebase';
+import { doc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
+
+
+const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, completedOrders }) => {
+    const [items, setItems] = useState([]);
     const [statusById, setStatusById] = useState({});
 
-    // 🔹 Real-time sync za svaki artikl
-    useEffect(() => {
-        const unsubscribers = items.map(item => {
-            const ref = doc(db, "orders", String(item.id));
-            return onSnapshot(ref, (snapshot) => {
-                const data = snapshot.data();
-                setStatusById(prev => ({
-                    ...prev,
-                    [item.id]: {
-                        inPreparation: !!data?.inPreparation,
-                        ready: !!data?.ready,
-                        completed: !!data?.completed
-                    }
-                }));
-            });
-        });
 
-        return () => unsubscribers.forEach(unsub => unsub());
-    }, []);
+useEffect(() => {
+  const fetchItems = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/items");
+      if (!res.ok) throw new Error(`HTTP greška: ${res.status}`);
+      const data = await res.json();
+      setItems(data);
+    } catch (error) {
+      console.error("Greška pri učitavanju:", error);
+    }
+  };
+
+  fetchItems();
+
+  const intervalId = setInterval(fetchItems, 5000); // svakih 5 sekundi
+
+  return () => clearInterval(intervalId);
+}, []);
+
+useEffect(() => {
+  if (items.length === 0) return; // čekaj dok se items ne učitaju
+
+  const unsubscribers = items.map(item => {
+    const ref = doc(db, "orders", String(item.id));
+    return onSnapshot(ref, (snapshot) => {
+      const data = snapshot.data();
+      setStatusById(prev => ({
+        ...prev,
+        [item.id]: {
+          inPreparation: !!data?.inPreparation,
+          ready: !!data?.ready,
+          completed: !!data?.completed
+        }
+      }));
+    });
+  });
+
+  return () => unsubscribers.forEach(unsub => unsub());
+}, [items]);
 
     const isInPreparation = (id) => !!statusById[id]?.inPreparation;
     const isCompletedDB = (id) => !!statusById[id]?.completed;
 
-    const handlePripremaClick = async (item) => {
-        handleAddCart(item);
+ const handlePripremaClick = async (item) => {
+  handleAddCart(item);
 
-        // Odmah lokalno prikaži dugmad
-        setStatusById(prev => ({
-            ...prev,
-            [item.id]: { ...prev[item.id], inPreparation: true }
-        }));
+  setStatusById(prev => ({
+    ...prev,
+    [item.id]: { ...prev[item.id], inPreparation: true }
+  }));
 
-        // Spremi u Firestore
-        await setDoc(doc(db, "orders", String(item.id)), {
-            inPreparation: true,
-            ready: false,
-            completed: false
-        }, { merge: true });
-    };
+  await setDoc(doc(db, "orders", String(item.id)), {
+    inPreparation: true,
+    ready: false,
+    completed: false
+  }, { merge: true });
+};
 
 const handleSpremnoClick = async (itemId) => {
   setStatusById(prev => ({
@@ -126,32 +76,40 @@ const handleSpremnoClick = async (itemId) => {
     [itemId]: { ...prev[itemId], ready: true }
   }));
 
-  // Firestore orders update
   await setDoc(doc(db, "orders", String(itemId)), {
-    ready: true
+    ready: true,
+    inPreparation: true,  
+    completed: false
   }, { merge: true });
 
-  // Dodaj u readyOrders kolekciju
   await setDoc(doc(db, "readyOrders", String(itemId)), {
     addedAt: serverTimestamp()
   });
 };
 
-    const handlePreuzetoClick = async (itemId) => {
-        await setDoc(doc(db, "orders", String(itemId)), {
-            completed: true,
-            inPreparation: false,
-            ready: false
-        }, { merge: true });
+const handlePreuzetoClick = async (itemId) => {
+  setStatusById(prev => ({
+    ...prev,
+    [itemId]: {
+      completed: true,
+      inPreparation: false,
+      ready: false
+    }
+  }));
 
-        handleRemoveCart(itemId);
-    };
+  await setDoc(doc(db, "orders", String(itemId)), {
+    completed: true,
+    inPreparation: false,
+    ready: false
+  }, { merge: true });
+
+  handleRemoveCart(itemId);
+};
 
     return (
         <div className="state-wrapper">
             <div className="state-content">
                 <div className="state-list-items">
-
                     {items
                         .filter(item => !completedOrders.includes(item.id) && !isCompletedDB(item.id))
                         .map((item) => (
@@ -198,7 +156,6 @@ const handleSpremnoClick = async (itemId) => {
                                 </div>
                             </div>
                         ))}
-
                 </div>
             </div>
         </div>
