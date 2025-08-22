@@ -51,7 +51,6 @@ const Cart = ({ cartItems, readyOrders = [] }) => {
           <video
             ref={videoRef}
             className="cart-video"
-            controls
             muted
             autoPlay
             onEnded={handleVideoEnd}
