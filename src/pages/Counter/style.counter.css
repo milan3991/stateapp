@@ -114,7 +114,8 @@ min-height: 400px;
 
 .quantity {
     display: flex;
-    margin: 15px;
+    width: 40px;
+    justify-content: space-between;
 }
 
 .action-button {

@@ -26,13 +26,13 @@ useEffect(() => {
 
   fetchItems();
 
-  const intervalId = setInterval(fetchItems, 5000); // svakih 5 sekundi
+  const intervalId = setInterval(fetchItems, 1000); // svaki 1 sekund
 
   return () => clearInterval(intervalId);
 }, []);
 
 useEffect(() => {
-  if (items.length === 0) return; // čekaj dok se items ne učitaju
+  if (items.length === 0) return; 
 
   const unsubscribers = items.map(item => {
     const ref = doc(db, "orders", String(item.id));

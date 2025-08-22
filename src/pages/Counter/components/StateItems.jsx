@@ -8,8 +8,10 @@ const StateItem = ({id, image, heading, quantity}) => {
             <div className='item_details'>
                 <div className='nameprice'>
                     <h4>{heading}</h4>
+                    <div className='quantity'>
                     <h4>X</h4>
                     <h4>{quantity}</h4>
+                    </div>
                 </div>
             </div>
             
