@@ -1,152 +1,98 @@
-import { useState, useEffect } from 'react';
-import StateItem from './components/StateItems';
+import { useState, useEffect } from "react";
+import StateItem from "./components/StateItems";
+import "./style.counter.css";
 
-import './style.counter.css';
+const State = () => {
+  const [orders, setOrders] = useState([]);
 
-import { db } from '../../firebase';
-import { doc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
-
-
-const State = ({ handleAddCart, handleRemoveCart, readyOrders, setReadyOrders, completedOrders }) => {
-  const [items, setItems] = useState([]);
-  const [statusById, setStatusById] = useState({});
-
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/orders");
+      if (!res.ok) throw new Error(`HTTP greška: ${res.status}`);
+      const data = await res.json();
+      setOrders(data);
+    } catch (error) {
+      console.error("Greška pri učitavanju:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/items");
-        if (!res.ok) throw new Error(`HTTP greška: ${res.status}`);
-        const data = await res.json();
-        setItems(data);
-      } catch (error) {
-        console.error("Greška pri učitavanju:", error);
-      }
-    };
-
-    fetchItems();
-
-    const intervalId = setInterval(fetchItems, 1000); // svaki 1 sekund
-
+    fetchOrders();
+    const intervalId = setInterval(fetchOrders, 2000);
     return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    if (items.length === 0) return;
+  const updateStatus = async (id, status) => {
+    try {
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === id ? { ...order, ...status } : order
+        )
+      );
 
-    const unsubscribers = items.map(item => {
-      const ref = doc(db, "orders", String(item.id));
-      return onSnapshot(ref, (snapshot) => {
-        const data = snapshot.data();
-        setStatusById(prev => ({
-          ...prev,
-          [item.id]: {
-            inPreparation: !!data?.inPreparation,
-            ready: !!data?.ready,
-            completed: !!data?.completed
-          }
-        }));
+      await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(status),
       });
-    });
-
-    return () => unsubscribers.forEach(unsub => unsub());
-  }, [items]);
-
-  const isInPreparation = (id) => !!statusById[id]?.inPreparation;
-  const isCompletedDB = (id) => !!statusById[id]?.completed;
-
-  const handlePripremaClick = async (item) => {
-    handleAddCart(item);
-
-    setStatusById(prev => ({
-      ...prev,
-      [item.id]: { ...prev[item.id], inPreparation: true }
-    }));
-
-    await setDoc(doc(db, "orders", String(item.id)), {
-      inPreparation: true,
-      ready: false,
-      completed: false
-    }, { merge: true });
+    } catch (err) {
+      console.error("Greška:", err);
+    }
   };
 
-  const handleSpremnoClick = async (itemId) => {
-    setStatusById(prev => ({
-      ...prev,
-      [itemId]: { ...prev[itemId], ready: true }
-    }));
-
-    await setDoc(doc(db, "orders", String(itemId)), {
-      ready: true,
-      inPreparation: true,
-      completed: false
-    }, { merge: true });
-
-    await setDoc(doc(db, "readyOrders", String(itemId)), {
-      addedAt: serverTimestamp()
-    });
+  const handlePripremaClick = (order) => {
+    updateStatus(order.id, { inPreparation: true, ready: false, completed: false });
   };
 
-  const handlePreuzetoClick = async (itemId) => {
-    setStatusById(prev => ({
-      ...prev,
-      [itemId]: {
-        completed: true,
-        inPreparation: false,
-        ready: false
-      }
-    }));
+  const handleSpremnoClick = (orderId) => {
+    updateStatus(orderId, { inPreparation: true, ready: true, completed: false });
+  };
 
-    await setDoc(doc(db, "orders", String(itemId)), {
-      completed: true,
-      inPreparation: false,
-      ready: false
-    }, { merge: true });
-
-    handleRemoveCart(itemId);
+  const handlePreuzetoClick = (orderId) => {
+    updateStatus(orderId, { inPreparation: false, ready: false, completed: true });
   };
 
   return (
     <div className="state-wrapper">
       <div className="state-content">
         <div className="state-list-items">
-          {items
-            .filter(item => !completedOrders.includes(item.id) && !isCompletedDB(item.id))
-            .map((item) => (
-              <div key={item.id} className="state-item-wrapper">
+          {orders
+            .filter((order) => !order.completed)
+            .map((order) => (
+              <div key={order.id} className="state-item-wrapper">
                 <div className="variants-wrapper">
-                  {item.variants.map((variant, index) => (
+                  {order.items.map((item, index) => (
                     <StateItem
                       key={index}
-                      id={item.id}
-                      image={variant.image}
-                      heading={variant.heading}
-                      quantity={variant.quantity}
+                      id={order.id}
+                      image={item.image}
+                      heading={item.heading}
+                      quantity={item.quantity}
                       hideButton={true}
                     />
                   ))}
                 </div>
 
                 <div className="action-button-wrapper">
-                  {!isInPreparation(item.id) && (
+                  {!order.inPreparation && (
                     <button
-                      onClick={() => handlePripremaClick(item)}
+                      onClick={() => handlePripremaClick(order)}
                       className="action-button"
                     >
                       Priprema
                     </button>
                   )}
 
-                  {isInPreparation(item.id) && (
+                  {order.inPreparation && !order.completed && (
                     <>
                       <button
-                        onClick={() => handleSpremnoClick(item.id)}
+                        onClick={() => handleSpremnoClick(order.id)}
                         className="action-button ready"
                       >
-                        Spremno
+                        {order.ready ? "✅ Spremno" : "Spremno"}
                       </button>
                       <button
-                        onClick={() => handlePreuzetoClick(item.id)}
+                        onClick={() => handlePreuzetoClick(order.id)}
                         className="action-button taken"
                       >
                         Preuzeto

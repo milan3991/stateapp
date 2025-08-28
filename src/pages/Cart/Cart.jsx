@@ -1,44 +1,43 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './cart.style.css';
-import CartItem from './components/CartItem';
-import videoSrc from '../../assets/video1.mp4';
-import videoSrc2 from '../../assets/video2.mp4';
+import React, { useState, useEffect } from "react";
+import "./cart.style.css";
+import CartItem from "./components/CartItem";
 
-const Cart = ({ cartItems, readyOrders = [] }) => {
-  const [currentVideo, setCurrentVideo] = useState(1);
-  const videoRef = useRef(null);
+const Cart = () => {
+  const [cartOrders, setCartOrders] = useState([]);
 
-  const handleVideoEnd = () => {
-    setCurrentVideo((prev) => (prev === 1 ? 2 : 1));
+  const fetchCartOrders = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/orders");
+      const data = await res.json();
+      const inPrep = data.filter(order => order.inPreparation && !order.completed);
+      setCartOrders(inPrep);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-
   useEffect(() => {
-    if (!cartItems.length && videoRef.current) {
-      videoRef.current.src = currentVideo === 1 ? videoSrc : videoSrc2;
-      videoRef.current
-        .play()
-        .catch((err) => console.log("Video play error:", err));
-    }
-  }, [cartItems, currentVideo]);
+    fetchCartOrders();
+    const interval = setInterval(fetchCartOrders, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="state-cart-items">
       <div className="cart">
-        {cartItems.map((cartItem) => (
+        {cartOrders.map((order) => (
           <div
-            key={cartItem.id}
-            className={`cart-product-wrapper ${readyOrders.includes(String(cartItem.orderId)) ? 'ready-frame' : ''
-              }`}
+            key={order.id}
+            className={`cart-product-wrapper ${order.ready ? "ready-frame" : ""}`}
           >
-            <h4 className='order-number'>Broj narudzbe: {cartItem.orderId}</h4>
+            <h4 className="order-number">Broj narudzbe: {order.id}</h4>
             <div className="cart-variants">
-              {cartItem.variants.map((variant, index) => (
+              {order.items.map((item, index) => (
                 <CartItem
                   key={index}
-                  image={variant.image}
-                  heading={variant.heading}
-                  quantity={variant.quantity}
+                  image={item.image}
+                  heading={item.heading}
+                  quantity={item.quantity}
                 />
               ))}
             </div>
@@ -46,14 +45,13 @@ const Cart = ({ cartItems, readyOrders = [] }) => {
         ))}
       </div>
 
-      {!cartItems.length && (
+      {!cartOrders.length && (
         <div className="cart-empty">
           <video
-            ref={videoRef}
             className="cart-video"
             muted
             autoPlay
-            onEnded={handleVideoEnd}
+            loop
           >
             Your browser does not support the video tag.
           </video>
