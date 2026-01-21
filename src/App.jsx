@@ -3,6 +3,7 @@ import "./App.css";
 import State from "./pages/Counter/State";
 import { useState } from "react";
 import Cart from "./pages/Cart/Cart";
+import POS from "./pos/pos";
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -23,6 +24,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/pos" element={<POS />} />
         <Route
           path="/"
           element={
