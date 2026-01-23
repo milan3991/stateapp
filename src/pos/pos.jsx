@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import "./style.pos.css";
 
 const PRODUCTS = [
   {
@@ -16,7 +17,7 @@ const PRODUCTS = [
     heading: "Latte",
     image: "https://www.svgrepo.com/show/499751/coffee.svg",
   },
-    {
+  {
     id: 4,
     heading: "Macchiato Vanilla",
     image: "https://www.svgrepo.com/show/211921/espresso.svg",
@@ -31,19 +32,20 @@ const PRODUCTS = [
     heading: "Espresso Classic",
     image: "https://www.svgrepo.com/show/499751/coffee.svg",
   },
-
 ];
 
 export default function POS() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
+  const isSubmitting = useRef(false);
 
+  /* ➕ DODAJ ARTIKAL */
   const addToCart = (product) => {
     setCart((prev) => {
-      const existing = prev.find((p) => p.heading === product.heading);
+      const existing = prev.find((p) => p.id === product.id);
       if (existing) {
         return prev.map((p) =>
-          p.heading === product.heading
+          p.id === product.id
             ? { ...p, quantity: p.quantity + 1 }
             : p
         );
@@ -51,49 +53,60 @@ export default function POS() {
       return [...prev, { ...product, quantity: 1 }];
     });
   };
-  const isSubmitting = useRef(false);
 
- const submitOrder = async () => {
-  // ⛔ HARD BLOCK (štiti od StrictMode duplog poziva)
-  if (isSubmitting.current) return;
-  if (cart.length === 0) return;
+  /* ➖ UKLONI ARTIKAL */
+  const removeFromCart = (id) => {
+    setCart((prev) =>
+      prev
+        .map((item) =>
+          item.id === id
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
 
-  isSubmitting.current = true;
-  setLoading(true);
+  /* 📤 SLANJE NARUDŽBE */
+  const submitOrder = async () => {
+    if (isSubmitting.current || !cart.length) return;
 
-  try {
-    const response = await fetch("http://localhost:5000/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: cart }),
-    });
+    isSubmitting.current = true;
+    setLoading(true);
 
-    if (!response.ok) throw new Error("Server error");
+    try {
+      const response = await fetch("http://localhost:5000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cart }),
+      });
 
-    setCart([]);
-    alert("Narudžba poslana! ✅");
-  } catch (err) {
-    alert("Greška pri slanju ❌");
-  } finally {
-    setLoading(false);
-    isSubmitting.current = false; // ⬅️ tek NA KRAJU
-  }
-};
+      if (!response.ok) throw new Error("Server error");
+
+      setCart([]);
+      alert("Narudžba poslana! ✅");
+    } catch (err) {
+      alert("Greška pri slanju ❌");
+    } finally {
+      setLoading(false);
+      isSubmitting.current = false;
+    }
+  };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto grid grid-cols-2 gap-6">
+    <div className="wrapper">
       {/* PRODUCTS */}
       <div>
-        <h2 className="text-xl font-bold mb-4">Proizvodi</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="heading">Proizvodi</h2>
+        <div className="products_wrapper">
           {PRODUCTS.map((p) => (
             <button
               key={p.id}
               onClick={() => addToCart(p)}
-              className="border rounded-2xl p-4 shadow hover:shadow-lg transition"
+              className="pos_button"
             >
-              <img src={p.image} className="mb-2 rounded-xl" />
-              <div className="font-semibold">{p.heading}</div>
+              <img src={p.image} className="pos_image" />
+              <div className="heading">{p.heading}</div>
             </button>
           ))}
         </div>
@@ -101,13 +114,26 @@ export default function POS() {
 
       {/* CART */}
       <div>
-        <h2 className="text-xl font-bold mb-4">Narudžba</h2>
-        <div className="border rounded-2xl p-4 min-h-[200px]">
-          {!cart.length && <div className="text-gray-400">Prazno</div>}
-          {cart.map((item, i) => (
-            <div key={i} className="flex justify-between mb-2">
-              <span>{item.heading}</span>
-              <span>x {item.quantity}</span>
+        <h2 className="heading">Narudžba</h2>
+
+        <div className="cart">
+          {!cart.length && <div className="heading">Prazno</div>}
+
+          {cart.map((item) => (
+            <div key={item.id} className="cart_item">
+              <img src={item.image} className="cart_image" />
+
+              <div className="cart_info">
+                <div className="cart_title">{item.heading}</div>
+                <div className="cart_qty">x {item.quantity}</div>
+              </div>
+
+              <button
+                className="remove_button"
+                onClick={() => removeFromCart(item.id)}
+              >
+                −
+              </button>
             </div>
           ))}
         </div>
@@ -115,7 +141,7 @@ export default function POS() {
         <button
           onClick={submitOrder}
           disabled={loading || !cart.length}
-          className="mt-4 w-full bg-black text-white py-3 rounded-2xl disabled:opacity-50"
+          className="send_button"
         >
           {loading ? "Slanje..." : "Pošalji narudžbu"}
         </button>
