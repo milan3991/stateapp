@@ -1,22 +1,31 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./cart.style.css";
 import CartItem from "./components/CartItem";
 
-import videoSrc from "../../assets/video1.mp4";
+import videoSrc1 from "../../assets/video1.mp4";
 import videoSrc2 from "../../assets/video2.mp4";
+// ⬇️ samo dodaješ nove po potrebi
+// import videoSrc3 from "../../assets/video3.mp4";
+
+const videos = [
+  videoSrc1,
+  videoSrc2,
+  // videoSrc3,
+];
 
 const Cart = () => {
   const [cartOrders, setCartOrders] = useState([]);
-  const [currentVideo, setCurrentVideo] = useState(1);
-  const videoRef = useRef(null);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   const fetchCartOrders = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/orders");
       const data = await res.json();
+
       const inPrep = data.filter(
         (order) => order.inPreparation && !order.completed
       );
+
       setCartOrders(inPrep);
     } catch (err) {
       console.error(err);
@@ -24,7 +33,7 @@ const Cart = () => {
   };
 
   const handleVideoEnd = () => {
-    setCurrentVideo((prev) => (prev === 1 ? 2 : 1));
+    setCurrentVideoIndex((prev) => (prev + 1) % videos.length);
   };
 
   useEffect(() => {
@@ -32,17 +41,6 @@ const Cart = () => {
     const interval = setInterval(fetchCartOrders, 2000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (!cartOrders.length && videoRef.current) {
-      videoRef.current.src =
-        currentVideo === 1 ? videoSrc : videoSrc2;
-
-      videoRef.current
-        .play()
-        .catch((err) => console.log("Video play error:", err));
-    }
-  }, [cartOrders, currentVideo]);
 
   return (
     <div className="state-cart-items">
@@ -55,7 +53,7 @@ const Cart = () => {
             }`}
           >
             <h4 className="order-number">
-              Broj narudzbe: {order.id}
+              Broj narudžbe: {order.id}
             </h4>
 
             <div className="cart-variants">
@@ -75,12 +73,16 @@ const Cart = () => {
       {!cartOrders.length && (
         <div className="cart-empty">
           <video
-            ref={videoRef}
+            key={currentVideoIndex} // 🔥 KLJUČNI DIO
             className="cart-video"
             muted
             autoPlay
             onEnded={handleVideoEnd}
           >
+            <source
+              src={videos[currentVideoIndex]}
+              type="video/mp4"
+            />
             Your browser does not support the video tag.
           </video>
         </div>
