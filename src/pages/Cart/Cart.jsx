@@ -4,13 +4,12 @@ import CartItem from "./components/CartItem";
 
 import videoSrc1 from "../../assets/video1.mp4";
 import videoSrc2 from "../../assets/video2.mp4";
-// ⬇️ samo dodaješ nove po potrebi
-// import videoSrc3 from "../../assets/video3.mp4";
+
 
 const videos = [
   videoSrc1,
   videoSrc2,
-  // videoSrc3,
+  
 ];
 
 const Cart = () => {
@@ -73,7 +72,7 @@ const Cart = () => {
       {!cartOrders.length && (
         <div className="cart-empty">
           <video
-            key={currentVideoIndex} // 🔥 KLJUČNI DIO
+            key={currentVideoIndex} 
             className="cart-video"
             muted
             autoPlay
