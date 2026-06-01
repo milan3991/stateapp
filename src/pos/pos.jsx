@@ -77,7 +77,7 @@ export default function POS() {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
         body: JSON.stringify({ items: cart }),
       });
 

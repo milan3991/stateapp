@@ -7,7 +7,9 @@ const State = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+        headers: { "ngrok-skip-browser-warning": "true" },
+      });
       if (!res.ok) throw new Error(`HTTP greška: ${res.status}`);
       const data = await res.json();
       setOrders(data);
@@ -32,7 +34,7 @@ const State = () => {
 
       await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${id}/status`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
         body: JSON.stringify(status),
       });
     } catch (err) {

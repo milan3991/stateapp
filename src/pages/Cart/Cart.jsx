@@ -18,7 +18,9 @@ const Cart = () => {
 
   const fetchCartOrders = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+        headers: { "ngrok-skip-browser-warning": "true" },
+      });
       const data = await res.json();
 
       const inPrep = data.filter(
