@@ -48,7 +48,6 @@ border-radius: 8px;
 
 .cart{
     display: flex;
-    flex-direction: column;
     width: 100%;
     gap: 10px;
 
